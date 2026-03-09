@@ -175,6 +175,7 @@ interface_member: $ => seq(
       field("name", $.identifier),
       ":",
       choice(
+        seq("pass", $._newline),
         seq(
           $._newline,
           $._indent,
@@ -522,6 +523,11 @@ event_member: $ => seq(
 
     argument_list: $ => prec.right(choice(
       seq(
+        repeat1($.soft_line_break),
+        $.argument,
+        repeat1($.soft_line_break),
+      ),
+      seq(
         $.argument,
         repeat(seq(",", repeat($.soft_line_break), $.argument)),
         optional(seq(",", repeat($.soft_line_break))),
@@ -670,6 +676,7 @@ event_member: $ => seq(
       field("function", $.atom_expression),
       "(",
       optional($.argument_list),
+      repeat($.soft_line_break),
       ")",
     )),
 
@@ -760,17 +767,21 @@ event_member: $ => seq(
     ),
 
     docstring: $ => choice(
-      seq('"""', repeat(choice($.docstring_chunk_double, $.docstring_newline)), '"""'),
-      seq("'''", repeat(choice($.docstring_chunk_single, $.docstring_newline)), "'''"),
+      seq('"""', repeat(choice($.docstring_chunk_double, $.docstring_quoted_double, $.docstring_newline)), '"""'),
+      seq("'''", repeat(choice($.docstring_chunk_single, $.docstring_quoted_single, $.docstring_newline)), "'''"),
     ),
 
     docstring_chunk_double: _ => token(prec(3, choice(
       ...DOCSTRING_CHUNK_DOUBLE_PATTERNS,
     ))),
 
+    docstring_quoted_double: _ => token(prec(3, /"[^"\n]+"/)),
+
     docstring_chunk_single: _ => token(prec(3, choice(
       ...DOCSTRING_CHUNK_SINGLE_PATTERNS,
     ))),
+
+    docstring_quoted_single: _ => token(prec(3, /'[^'\n]+'/)),
 
     docstring_newline: _ => token(prec(3, /\n/)),
 
@@ -842,6 +853,12 @@ event_member: $ => seq(
       commaSep1(choice($.type, $.expression)),
       optional(","),
       "]",
+      repeat(seq(
+        "[",
+        commaSep1(choice($.type, $.expression)),
+        optional(","),
+        "]",
+      )),
     ),
 
     comment: _ => token(prec(1, seq("#", /.*/))),

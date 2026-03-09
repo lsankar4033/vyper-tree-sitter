@@ -183,6 +183,12 @@ bool tree_sitter_vyper_external_scanner_scan(void *payload, TSLexer *lexer, cons
         break;
       }
 
+      // Continuation lines that only close a surrounding delimiter should not
+      // participate in indentation handling.
+      if (lexer->lookahead == ')' || lexer->lookahead == ']' || lexer->lookahead == '}') {
+        return false;
+      }
+
       uint32_t current_indent = top_indent(scanner);
       if (indent > current_indent) {
         if (valid_symbols[INDENT]) {
@@ -213,6 +219,20 @@ bool tree_sitter_vyper_external_scanner_scan(void *payload, TSLexer *lexer, cons
 
       return false;
     }
+  }
+
+  if (lexer->lookahead == '\n') {
+    if (!valid_symbols[NEWLINE]) {
+      return false;
+    }
+    lexer->advance(lexer, true);
+    lexer->mark_end(lexer);
+    lexer->result_symbol = NEWLINE;
+    return true;
+  }
+
+  while (lexer->lookahead == ' ' || lexer->lookahead == '\t' || lexer->lookahead == '\f' || lexer->lookahead == '\r') {
+    lexer->advance(lexer, true);
   }
 
   if (lexer->lookahead == '\n') {

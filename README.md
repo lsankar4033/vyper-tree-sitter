@@ -48,6 +48,18 @@ Current corpus coverage includes:
 - deprecated `enum`, empty event bodies, and imported type references like `foo.Bar`
 - module and function docstrings
 
-Smoke-tested successfully against:
+Reference smoke set:
 
-- `twocrypto-ng/contracts/main/Twocrypto.vy`
+- `../blockhash-oracle`
+- `../LZV2Vyper`
+- `../twocrypto-ng`
+- `../curve-std`
+- `../yb-core`
+- `../fee-splitter`
+- `../yearn-vaults-v3/contracts`
+
+Run it with:
+
+```bash
+bash scripts/smoke_reference.sh
+```
