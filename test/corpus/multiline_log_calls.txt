@@ -1,0 +1,135 @@
+=========================
+Multiline log calls
+=========================
+
+event UpdateProtocolFeeBps:
+    old_fee: uint16
+    new_fee: uint16
+
+event StrategyReported:
+    strategy: address
+    gain: uint256
+    loss: uint256
+    current_debt: uint256
+    protocol_fees: uint256
+    total_fees: uint256
+    total_refunds: uint256
+
+@external
+def emit_events():
+    log UpdateProtocolFeeBps(
+        old_fee,
+        new_fee
+    )
+
+    log StrategyReported(
+        strategy,
+        gain,
+        loss,
+        current_debt,
+        total_fees * convert(protocol_fee_bps, uint256) / 10_000, # Protocol Fees
+        total_fees,
+        total_refunds
+    )
+
+---
+
+(source_file
+  (event_declaration
+    (identifier)
+    (event_member
+      (identifier)
+      (identifier))
+    (event_member
+      (identifier)
+      (identifier)))
+  (event_declaration
+    (identifier)
+    (event_member
+      (identifier)
+      (identifier))
+    (event_member
+      (identifier)
+      (identifier))
+    (event_member
+      (identifier)
+      (identifier))
+    (event_member
+      (identifier)
+      (identifier))
+    (event_member
+      (identifier)
+      (identifier))
+    (event_member
+      (identifier)
+      (identifier))
+    (event_member
+      (identifier)
+      (identifier)))
+  (function_definition
+    (decorator
+      (identifier))
+    (function_signature
+      (identifier))
+    (block
+      (log_statement
+        (identifier)
+        (argument_list
+          (soft_line_break)
+          (argument
+            (atom_expression
+              (identifier)))
+          (soft_line_break)
+          (argument
+            (atom_expression
+              (identifier))))
+        (soft_line_break_end))
+      (log_statement
+        (identifier)
+        (argument_list
+          (soft_line_break)
+          (argument
+            (atom_expression
+              (identifier)))
+          (soft_line_break)
+          (argument
+            (atom_expression
+              (identifier)))
+          (soft_line_break)
+          (argument
+            (atom_expression
+              (identifier)))
+          (soft_line_break)
+          (argument
+            (atom_expression
+              (identifier)))
+          (soft_line_break)
+          (argument
+            (wrapped_binary_expression
+              (wrapped_binary_expression
+                (atom_expression
+                  (identifier))
+                (atom_expression
+                  (call
+                    (atom_expression
+                      (identifier))
+                    (argument_list
+                      (argument
+                        (atom_expression
+                          (identifier)))
+                      (argument
+                        (atom_expression
+                          (identifier)))))))
+              (atom_expression
+                (atom
+                  (integer)))))
+          (comment)
+          (soft_line_break)
+          (argument
+            (atom_expression
+              (identifier)))
+          (soft_line_break)
+          (argument
+            (atom_expression
+              (identifier))))
+        (soft_line_break_end)))))

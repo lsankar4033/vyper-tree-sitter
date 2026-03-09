@@ -1,0 +1,80 @@
+=========================
+Conditional and postfix types
+=========================
+
+MAX_TOKENS: constant(uint256) = 100
+token_sets: public(DynArray[IERC20, MAX_TOKENS][10**9])
+
+@external
+def setReadChannel(_channelId: uint32, _active: bool):
+    peer: bytes32 = convert(self, bytes32) if _active else convert(empty(address), bytes32)
+
+---
+
+(source_file
+  (constant_declaration
+    (identifier)
+    (constant_type
+      (identifier))
+    (atom_expression
+      (atom
+        (integer))))
+  (state_variable_declaration
+    (identifier)
+    (variable_annotation
+      (postfix_type
+        (dyn_array_type
+          (identifier)
+          (atom_expression
+            (identifier)))
+        (binary_expression
+          (atom_expression
+            (atom
+              (integer)))
+          (atom_expression
+            (atom
+              (integer)))))))
+  (function_definition
+    (decorator
+      (identifier))
+    (function_signature
+      (identifier)
+      (parameter_list
+        (parameter
+          (identifier)
+          (identifier))
+        (parameter
+          (identifier)
+          (identifier))))
+    (block
+      (state_variable_declaration
+        (identifier)
+        (identifier)
+        (conditional_expression
+          (atom_expression
+            (call
+              (atom_expression
+                (identifier))
+              (argument_list
+                (argument
+                  (atom_expression
+                    (identifier)))
+                (argument
+                  (atom_expression
+                    (identifier))))))
+          (atom_expression
+            (identifier))
+          (atom_expression
+            (call
+              (atom_expression
+                (identifier))
+              (argument_list
+                (argument
+                  (atom_expression
+                    (atom
+                      (special_builtin
+                        (empty_builtin
+                          (identifier))))))
+                (argument
+                  (atom_expression
+                    (identifier)))))))))))

@@ -1,0 +1,54 @@
+=========================
+Declaration body spacing
+=========================
+
+interface Aragon:
+    # VoterState: 0 = Absent, 1 = Yes
+    def getVoterState(_voteID: uint256, _voter: address) -> uint8: view
+    def getVote(_voteID: uint256) -> VoteState: view
+
+event FactoryShutdown:
+    pass
+
+struct PFConfig:
+    # Percent of protocol's split of fees in Basis Points.
+    fee_bps: uint16
+    fee_recipient: address
+
+---
+
+(source_file
+  (interface_declaration
+    (identifier)
+    (interface_member
+      (function_signature
+        (identifier)
+        (parameter_list
+          (parameter
+            (identifier)
+            (identifier))
+          (parameter
+            (identifier)
+            (identifier)))
+        (identifier))
+      (mutability))
+    (interface_member
+      (function_signature
+        (identifier)
+        (parameter_list
+          (parameter
+            (identifier)
+            (identifier)))
+        (identifier))
+      (mutability)))
+  (event_declaration
+    (identifier)
+    (pass_statement))
+  (struct_declaration
+    (identifier)
+    (struct_member
+      (identifier)
+      (identifier))
+    (struct_member
+      (identifier)
+      (identifier))))
