@@ -9,8 +9,8 @@ enum TokenType {
   NEWLINE,
   INDENT,
   DEDENT,
-  SOFT_NEWLINE,
-  SOFT_NEWLINE_END,
+  SOFT_LINE_BREAK,
+  SOFT_LINE_BREAK_END,
 };
 
 typedef struct {
@@ -74,7 +74,7 @@ static bool emit_newline(TSLexer *lexer) {
 }
 
 static bool emit_line_break_token(TSLexer *lexer, const bool *valid_symbols) {
-  bool wants_soft = valid_symbols[SOFT_NEWLINE] || valid_symbols[SOFT_NEWLINE_END];
+  bool wants_soft = valid_symbols[SOFT_LINE_BREAK] || valid_symbols[SOFT_LINE_BREAK_END];
   bool wants_newline = valid_symbols[NEWLINE];
 
   if (!wants_soft && !wants_newline) {
@@ -90,13 +90,13 @@ static bool emit_line_break_token(TSLexer *lexer, const bool *valid_symbols) {
 
     lexer->mark_end(lexer);
 
-    if (is_closing_delimiter(lexer->lookahead) && valid_symbols[SOFT_NEWLINE_END]) {
-      lexer->result_symbol = SOFT_NEWLINE_END;
+    if (is_closing_delimiter(lexer->lookahead) && valid_symbols[SOFT_LINE_BREAK_END]) {
+      lexer->result_symbol = SOFT_LINE_BREAK_END;
       return true;
     }
 
-    if (valid_symbols[SOFT_NEWLINE]) {
-      lexer->result_symbol = SOFT_NEWLINE;
+    if (valid_symbols[SOFT_LINE_BREAK]) {
+      lexer->result_symbol = SOFT_LINE_BREAK;
       return true;
     }
   }

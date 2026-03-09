@@ -12,10 +12,8 @@ commitment_count: public(
   (state_variable_declaration
     name: (identifier)
     type: (variable_annotation
-      (soft_line_break)
       value: (hash_map_type
         (identifier)
         (hash_map_type
           (identifier)
-          (identifier)))
-      (soft_line_break_end))))
+          (identifier))))))

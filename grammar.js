@@ -13,8 +13,8 @@ const {
 } = require("./grammar/tokens");
 
 const softBreakTail = $ => seq(
-  repeat($.soft_line_break),
-  optional($.soft_line_break_end),
+  repeat($._soft_line_break),
+  optional($._soft_line_break_end),
 );
 
 const declarationBody = ($, memberRule) => seq(
@@ -33,16 +33,16 @@ const bareIdentifierLine = $ => seq(
 
 const commaSeparatedWithSoftBreaks = ($, itemRule) => seq(
   itemRule,
-  repeat(seq(",", repeat($.soft_line_break), itemRule)),
-  optional(seq(",", repeat($.soft_line_break))),
+  repeat(seq(",", repeat($._soft_line_break), itemRule)),
+  optional(seq(",", repeat($._soft_line_break))),
 );
 
 const multilineCommaSeparatedWithSoftBreaks = ($, itemRule) => seq(
-  repeat1($.soft_line_break),
+  repeat1($._soft_line_break),
   itemRule,
-  repeat(seq(",", repeat($.soft_line_break), itemRule)),
-  optional(seq(",", repeat($.soft_line_break))),
-  repeat($.soft_line_break),
+  repeat(seq(",", repeat($._soft_line_break), itemRule)),
+  optional(seq(",", repeat($._soft_line_break))),
+  repeat($._soft_line_break),
 );
 
 module.exports = grammar({
@@ -52,8 +52,8 @@ module.exports = grammar({
     $._newline,
     $._indent,
     $._dedent,
-    $.soft_line_break,
-    $.soft_line_break_end,
+    $._soft_line_break,
+    $._soft_line_break_end,
   ],
 
   extras: $ => [
@@ -278,10 +278,10 @@ module.exports = grammar({
     ),
 
     module_binding_list: $ => seq(
-      optional($.soft_line_break),
+      optional($._soft_line_break),
       $.module_binding,
-      repeat(seq(optional($.soft_line_break), ",", optional($.soft_line_break), $.module_binding)),
-      optional(seq(optional($.soft_line_break), ",")),
+      repeat(seq(optional($._soft_line_break), ",", optional($._soft_line_break), $.module_binding)),
+      optional(seq(optional($._soft_line_break), ",")),
       softBreakTail($),
     ),
 
@@ -316,7 +316,7 @@ module.exports = grammar({
     constant_type: $ => seq(
       "constant",
       "(",
-      optional($.soft_line_break),
+      optional($._soft_line_break),
       $.type,
       softBreakTail($),
       ")",
@@ -325,7 +325,7 @@ module.exports = grammar({
     variable_annotation: $ => seq(
       choice("public", "reentrant", "immutable", "transient"),
       "(",
-      optional($.soft_line_break),
+      optional($._soft_line_break),
       field("value", choice($.variable_annotation, $.type)),
       softBreakTail($),
       ")",
@@ -351,7 +351,7 @@ module.exports = grammar({
       field("name", $.identifier),
       "(",
       optional($.parameter_list),
-      optional($.soft_line_break_end),
+      optional($._soft_line_break_end),
       ")",
       optional(seq("->", field("return_type", $.type))),
     ),
@@ -364,7 +364,7 @@ module.exports = grammar({
     decorator: $ => seq(
       "@",
       field("name", $.identifier),
-      optional(seq("(", optional($.argument_list), optional($.soft_line_break_end), ")")),
+      optional(seq("(", optional($.argument_list), optional($._soft_line_break_end), ")")),
       $._newline,
     ),
 
@@ -441,7 +441,7 @@ module.exports = grammar({
       choice($.identifier, $.attribute, $.subscript),
       "(",
       optional($.argument_list),
-      optional($.soft_line_break_end),
+      optional($._soft_line_break_end),
       ")",
       $._newline,
     ),
@@ -574,7 +574,7 @@ module.exports = grammar({
       seq("(", $.expression, ")"),
       seq(
         "(",
-        repeat1($.soft_line_break),
+        repeat1($._soft_line_break),
         choice($.wrapped_binary_expression, $.expression),
         softBreakTail($),
         ")",
@@ -652,24 +652,24 @@ module.exports = grammar({
       ].map(([operator, precedence]) =>
         prec.left(precedence, seq(
           field("left", choice($.wrapped_binary_expression, $.expression)),
-          repeat($.soft_line_break),
+          repeat($._soft_line_break),
           field("operator", operator),
-          repeat($.soft_line_break),
+          repeat($._soft_line_break),
           field("right", choice($.wrapped_binary_expression, $.expression)),
         )),
       ),
       prec.right(PREC.power, seq(
         field("left", choice($.wrapped_binary_expression, $.expression)),
-        repeat($.soft_line_break),
+        repeat($._soft_line_break),
         field("operator", "**"),
-        repeat($.soft_line_break),
+        repeat($._soft_line_break),
         field("right", choice($.wrapped_binary_expression, $.expression)),
       )),
       prec.left(PREC.compare, seq(
         field("left", choice($.wrapped_binary_expression, $.expression)),
-        repeat($.soft_line_break),
+        repeat($._soft_line_break),
         field("operator", seq("not", "in")),
-        repeat($.soft_line_break),
+        repeat($._soft_line_break),
         field("right", choice($.wrapped_binary_expression, $.expression)),
       )),
     ),
@@ -678,7 +678,7 @@ module.exports = grammar({
       field("function", $.atom_expression),
       "(",
       optional($.argument_list),
-      optional($.soft_line_break_end),
+      optional($._soft_line_break_end),
       ")",
     )),
 
@@ -709,10 +709,10 @@ module.exports = grammar({
 
     multiline_tuple: $ => seq(
       "(",
-      optional($.soft_line_break),
+      optional($._soft_line_break),
       $.expression,
-      repeat(seq(optional($.soft_line_break), ",", optional($.soft_line_break), $.expression)),
-      optional(seq(optional($.soft_line_break), ",")),
+      repeat(seq(optional($._soft_line_break), ",", optional($._soft_line_break), $.expression)),
+      optional(seq(optional($._soft_line_break), ",")),
       softBreakTail($),
       ")",
     ),
@@ -726,10 +726,10 @@ module.exports = grammar({
       ),
       seq(
         "[",
-        optional($.soft_line_break),
+        optional($._soft_line_break),
         $.expression,
-        repeat(seq(optional($.soft_line_break), ",", optional($.soft_line_break), $.expression)),
-        optional(seq(optional($.soft_line_break), ",")),
+        repeat(seq(optional($._soft_line_break), ",", optional($._soft_line_break), $.expression)),
+        optional(seq(optional($._soft_line_break), ",")),
         softBreakTail($),
         "]",
       ),
@@ -744,10 +744,10 @@ module.exports = grammar({
       ),
       seq(
         "{",
-        repeat1($.soft_line_break),
+        repeat1($._soft_line_break),
         $.dict_pair,
-        repeat(seq(optional($.soft_line_break), ",", repeat($.soft_line_break), $.dict_pair)),
-        optional(seq(optional($.soft_line_break), ",")),
+        repeat(seq(optional($._soft_line_break), ",", repeat($._soft_line_break), $.dict_pair)),
+        optional(seq(optional($._soft_line_break), ",")),
         softBreakTail($),
         "}",
       ),
@@ -806,7 +806,7 @@ module.exports = grammar({
     empty_builtin: $ => seq(
       "empty",
       "(",
-      optional($.soft_line_break),
+      optional($._soft_line_break),
       $.type,
       softBreakTail($),
       ")",
@@ -815,13 +815,13 @@ module.exports = grammar({
     abi_decode_builtin: $ => seq(
       choice("abi_decode", "_abi_decode"),
       "(",
-      optional($.soft_line_break),
+      optional($._soft_line_break),
       $.argument,
-      repeat($.soft_line_break),
+      repeat($._soft_line_break),
       ",",
-      repeat($.soft_line_break),
+      repeat($._soft_line_break),
       $.type,
-      repeat(seq(repeat($.soft_line_break), ",", repeat($.soft_line_break), $.keyword_argument)),
+      repeat(seq(repeat($._soft_line_break), ",", repeat($._soft_line_break), $.keyword_argument)),
       softBreakTail($),
       ")",
     ),
@@ -858,10 +858,10 @@ module.exports = grammar({
             optional(","),
           ),
           seq(
-            repeat1($.soft_line_break),
+            repeat1($._soft_line_break),
             choice($.type, $.expression),
-            repeat(seq(optional($.soft_line_break), ",", repeat($.soft_line_break), choice($.type, $.expression))),
-            optional(seq(optional($.soft_line_break), ",")),
+            repeat(seq(optional($._soft_line_break), ",", repeat($._soft_line_break), choice($.type, $.expression))),
+            optional(seq(optional($._soft_line_break), ",")),
             softBreakTail($),
           ),
         ),
@@ -886,10 +886,10 @@ module.exports = grammar({
       ),
       seq(
         "(",
-        repeat1($.soft_line_break),
+        repeat1($._soft_line_break),
         $.type,
-        repeat(seq(optional($.soft_line_break), ",", repeat($.soft_line_break), $.type)),
-        optional(seq(optional($.soft_line_break), ",")),
+        repeat(seq(optional($._soft_line_break), ",", repeat($._soft_line_break), $.type)),
+        optional(seq(optional($._soft_line_break), ",")),
         softBreakTail($),
         ")",
       ),
@@ -907,11 +907,11 @@ module.exports = grammar({
       seq(
         "DynArray",
         "[",
-        repeat1($.soft_line_break),
+        repeat1($._soft_line_break),
         $.type,
-        repeat($.soft_line_break),
+        repeat($._soft_line_break),
         ",",
-        repeat($.soft_line_break),
+        repeat($._soft_line_break),
         $.expression,
         softBreakTail($),
         "]",
@@ -930,11 +930,11 @@ module.exports = grammar({
       seq(
         "HashMap",
         "[",
-        repeat1($.soft_line_break),
+        repeat1($._soft_line_break),
         $.type,
-        repeat($.soft_line_break),
+        repeat($._soft_line_break),
         ",",
-        repeat($.soft_line_break),
+        repeat($._soft_line_break),
         $.type,
         softBreakTail($),
         "]",
@@ -946,7 +946,7 @@ module.exports = grammar({
       seq(
         "String",
         "[",
-        repeat1($.soft_line_break),
+        repeat1($._soft_line_break),
         $.expression,
         softBreakTail($),
         "]",
@@ -958,7 +958,7 @@ module.exports = grammar({
       seq(
         "Bytes",
         "[",
-        repeat1($.soft_line_break),
+        repeat1($._soft_line_break),
         $.expression,
         softBreakTail($),
         "]",
@@ -974,10 +974,10 @@ module.exports = grammar({
           optional(","),
         ),
         seq(
-          repeat1($.soft_line_break),
+          repeat1($._soft_line_break),
           choice($.type, $.expression),
-          repeat(seq(optional($.soft_line_break), ",", repeat($.soft_line_break), choice($.type, $.expression))),
-          optional(seq(optional($.soft_line_break), ",")),
+          repeat(seq(optional($._soft_line_break), ",", repeat($._soft_line_break), choice($.type, $.expression))),
+          optional(seq(optional($._soft_line_break), ",")),
           softBreakTail($),
         ),
       ),

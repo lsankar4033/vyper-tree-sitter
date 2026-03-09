@@ -27,7 +27,6 @@ def demo():
         right: (atom_expression
           (atom
             (parenthesized_expression
-              (soft_line_break)
               (wrapped_binary_expression
                 left: (atom_expression
                   (atom
@@ -50,7 +49,6 @@ def demo():
                         right: (atom_expression
                           (atom
                             (integer)))))))
-                (soft_line_break)
                 right: (external_call
                   value: (atom_expression
                     (call
@@ -64,5 +62,4 @@ def demo():
                                 (argument
                                   (atom_expression
                                     (identifier))))))
-                          attribute: (identifier)))))))
-              (soft_line_break_end))))))))
+                          attribute: (identifier))))))))))))))

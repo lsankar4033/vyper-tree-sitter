@@ -38,19 +38,16 @@ exports: (
     value: (identifier))
   (exports_declaration
     (tuple
-      (soft_line_break)
       (atom_expression
         (attribute
           value: (atom_expression
             (identifier))
           attribute: (identifier)))
-      (soft_line_break)
       (atom_expression
         (attribute
           value: (atom_expression
             (identifier))
-          attribute: (identifier)))
-      (soft_line_break_end)))
+          attribute: (identifier)))))
   (from_import_statement
     (relative_import_path
       (dotted_name
@@ -69,16 +66,13 @@ exports: (
             (identifier))))))
   (exports_declaration
     (tuple
-      (soft_line_break)
       (atom_expression
         (attribute
           value: (atom_expression
             (identifier))
           attribute: (identifier)))
-      (soft_line_break)
       (atom_expression
         (attribute
           value: (atom_expression
             (identifier))
-          attribute: (identifier)))
-      (soft_line_break_end))))
+          attribute: (identifier))))))

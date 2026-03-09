@@ -20,7 +20,6 @@ def get_blockhash(
     (function_signature
       name: (identifier)
       (parameter_list
-        (soft_line_break)
         (parameter
           name: (identifier)
           type: (identifier)
@@ -39,7 +38,6 @@ def get_blockhash(
           default: (atom_expression
             (atom
               (boolean)))))
-      (soft_line_break_end)
       return_type: (tuple_type
         (identifier)
         (identifier)))

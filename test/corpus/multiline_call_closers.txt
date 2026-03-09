@@ -44,7 +44,6 @@ def set_threshold(_new_threshold: uint256):
                   (identifier))
                 (identifier)))
             (argument_list
-              (soft_line_break)
               (argument
                 (atom_expression
                   (atom
@@ -54,8 +53,7 @@ def set_threshold(_new_threshold: uint256):
                       (atom_expression
                         (identifier))
                       (atom_expression
-                        (identifier)))))))
-            (soft_line_break_end))))))
+                        (identifier))))))))))))
   (function_definition
     (decorator
       (identifier))
@@ -75,14 +73,12 @@ def set_threshold(_new_threshold: uint256):
               (atom_expression
                 (identifier))
               (argument_list
-                (soft_line_break)
                 (argument
                   (atom_expression
                     (attribute
                       (atom_expression
                         (identifier))
-                      (identifier)))))
-              (soft_line_break_end))))
+                      (identifier))))))))
         (atom_expression
           (atom
             (string)))))))

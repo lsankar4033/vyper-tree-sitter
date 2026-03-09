@@ -26,17 +26,13 @@ def prep(swap: address) -> (
           name: (identifier)
           type: (identifier)))
       return_type: (tuple_type
-        (soft_line_break)
         (subscripted_type
           (identifier)
           (atom_expression
             (atom
               (integer))))
-        (soft_line_break)
         (identifier)
-        (soft_line_break)
-        (identifier)
-        (soft_line_break_end)))
+        (identifier)))
     (block
       (return_statement
         (atom_expression

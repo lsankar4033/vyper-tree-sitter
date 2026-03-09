@@ -75,35 +75,27 @@ def emit_events():
       (log_statement
         (identifier)
         (argument_list
-          (soft_line_break)
           (argument
             (atom_expression
               (identifier)))
-          (soft_line_break)
           (argument
             (atom_expression
-              (identifier))))
-        (soft_line_break_end))
+              (identifier)))))
       (log_statement
         (identifier)
         (argument_list
-          (soft_line_break)
           (argument
             (atom_expression
               (identifier)))
-          (soft_line_break)
           (argument
             (atom_expression
               (identifier)))
-          (soft_line_break)
           (argument
             (atom_expression
               (identifier)))
-          (soft_line_break)
           (argument
             (atom_expression
               (identifier)))
-          (soft_line_break)
           (argument
             (wrapped_binary_expression
               (wrapped_binary_expression
@@ -124,12 +116,9 @@ def emit_events():
                 (atom
                   (integer)))))
           (comment)
-          (soft_line_break)
           (argument
             (atom_expression
               (identifier)))
-          (soft_line_break)
           (argument
             (atom_expression
-              (identifier))))
-        (soft_line_break_end)))))
+              (identifier))))))))
