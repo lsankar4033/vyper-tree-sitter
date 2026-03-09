@@ -11,9 +11,6 @@ node_modules/
 .venv/
 build/
 target/
-src/parser.c
-src/grammar.json
-src/node-types.json
 *.wasm
 *.dylib
 *.log
