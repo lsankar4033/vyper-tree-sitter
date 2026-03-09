@@ -38,11 +38,14 @@ the official Vyper parser pipeline.
 Current corpus coverage includes:
 
 - declarations, structs, events, flags, and basic functions
+- declaration bodies with leading blank/comment-only lines and `event ...: pass`
 - imports and aliased imports
 - parenthesized imports and wildcard imports
 - interfaces, `implements`, and `exports`
 - advanced type syntax including `DynArray[...]` and nested `HashMap[...]`
+- postfix array suffixes on explicit types and inline conditional expressions
 - `extcall` / `staticcall`
+- multiline closer-line calls and multiline `log Foo(...)`
 - nested control flow with typed `for` targets, `raise`, `continue`, and `break`
 - list and tuple literals, `empty(...)`, `abi_decode(...)`, and `in` / `not in`
 - deprecated `enum`, empty event bodies, and imported type references like `foo.Bar`
