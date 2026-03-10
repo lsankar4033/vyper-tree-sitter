@@ -21,7 +21,9 @@ def f():
     (function_signature
       name: (identifier))
     (block
-      (docstring_statement
-        (docstring
-          (docstring_chunk_double)))
+      (expression_statement
+        (atom_expression
+          (atom
+            (triple_quoted_string
+              (docstring_chunk_double)))))
       (pass_statement))))

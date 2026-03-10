@@ -23,13 +23,15 @@ def newOptions() -> Bytes[MAX_OPTIONS_TOTAL_SIZE]:
         (atom_expression
           (identifier))))
     (block
-      (docstring_statement
-        (docstring
-          (docstring_newline)
-          (docstring_chunk_double)
-          (docstring_newline)
-          (docstring_chunk_double)
-          (docstring_newline)))
+      (expression_statement
+        (atom_expression
+          (atom
+            (triple_quoted_string
+              (docstring_newline)
+              (docstring_chunk_double)
+              (docstring_newline)
+              (docstring_chunk_double)
+              (docstring_newline)))))
       (state_variable_declaration
         name: (identifier)
         type: (bytes_type

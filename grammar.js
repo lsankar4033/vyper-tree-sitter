@@ -8,6 +8,10 @@ const {
   BYTE_STRING_SINGLE,
   HEX_STRING_DOUBLE,
   HEX_STRING_SINGLE,
+  RAW_STRING_DOUBLE,
+  RAW_STRING_SINGLE,
+  RAW_BYTE_STRING_DOUBLE,
+  RAW_BYTE_STRING_SINGLE,
   STRING_DOUBLE,
   STRING_SINGLE,
   DOCSTRING_CHUNK_DOUBLE_PATTERNS,
@@ -113,8 +117,11 @@ module.exports = grammar({
     [$.parenthesized_expression, $.tuple],
     [$.parenthesized_expression, $.multiline_tuple],
     [$.parenthesized_expression, $.tuple_type],
+    [$.parenthesized_expression, $.multiline_tuple, $.tuple_type],
     [$.tuple, $.multiline_tuple],
+    [$.docstring, $.triple_quoted_string],
     [$.parameter_list],
+    [$.module_binding_list],
     [$.argument_list],
     [$.argument, $.argument_list],
     [$.argument_list, $.call],
@@ -309,17 +316,27 @@ module.exports = grammar({
       "]",
     ),
 
-    module_binding_list: $ => seq(
-      optional($._soft_line_break),
-      $.module_binding,
-      repeat(seq(optional($._soft_line_break), ",", optional($._soft_line_break), $.module_binding)),
-      optional(seq(optional($._soft_line_break), ",")),
-      softBreakTail($),
+    module_binding_list: $ => choice(
+      seq(
+        $.module_binding,
+        repeat(seq(",", $.module_binding)),
+        optional(","),
+        softBreakTail($),
+      ),
+      seq(
+        repeat1($._soft_line_break),
+        $.module_binding,
+        repeat(seq(",", repeat($._soft_line_break), $.module_binding)),
+        optional(seq(",", repeat($._soft_line_break))),
+        repeat($._soft_line_break),
+      ),
     ),
 
     module_binding: $ => seq(
       field("name", $.identifier),
+      repeat($._soft_line_break),
       ":=",
+      repeat($._soft_line_break),
       field("value", $.atom_expression),
     ),
 
@@ -341,7 +358,7 @@ module.exports = grammar({
         seq("public", "(", $.constant_type, ")"),
       ),
       "=",
-      field("value", $.expression),
+      field("value", $._value_expression),
       $._newline,
     ),
 
@@ -400,15 +417,26 @@ module.exports = grammar({
       $._newline,
     ),
 
-    parameter: $ => seq(
-      field("name", $.identifier),
-      ":",
-      field("type", $.type),
-      optional(seq(
+    parameter: $ => prec.right(choice(
+      seq(
+        field("name", $.identifier),
+        repeat($._soft_line_break),
+        ":",
+        repeat($._soft_line_break),
+        field("type", $.type),
+        repeat($._soft_line_break),
         "=",
+        repeat($._soft_line_break),
         field("default", $.expression),
-      )),
-    ),
+      ),
+      seq(
+        field("name", $.identifier),
+        repeat($._soft_line_break),
+        ":",
+        repeat($._soft_line_break),
+        field("type", $.type),
+      ),
+    )),
 
     mutability: _ => choice("view", "pure", "nonpayable", "payable"),
 
@@ -521,7 +549,20 @@ module.exports = grammar({
 
     augmented_assignment: $ => seq(
       field("left", $.expression),
-      field("operator", choice("+=", "-=", "*=", "/=", "//=", "%=")),
+      field("operator", choice(
+        "+=",
+        "-=",
+        "*=",
+        "/=",
+        "//=",
+        "%=",
+        "&=",
+        "|=",
+        "^=",
+        "<<=",
+        ">>=",
+        "**=",
+      )),
       field("right", $.expression),
       $._newline,
     ),
@@ -829,6 +870,10 @@ module.exports = grammar({
       $.decimal,
       $.integer,
       $.hex_string,
+      $.triple_quoted_string,
+      $.prefixed_string,
+      $.prefixed_byte_string,
+      $.adjacent_string,
       $.string,
       $.boolean,
       $.ellipsis,
@@ -860,6 +905,40 @@ module.exports = grammar({
     docstring_newline: _ => token(prec(3, /\n/)),
 
     hex_string: _ => token(choice(HEX_STRING_DOUBLE, HEX_STRING_SINGLE)),
+
+    triple_quoted_string: $ => choice(
+      seq('"""', repeat(choice($.docstring_chunk_double, $.docstring_quoted_double, $.docstring_newline)), '"""'),
+      seq("'''", repeat(choice($.docstring_chunk_single, $.docstring_quoted_single, $.docstring_newline)), "'''"),
+      seq('b"""', repeat(choice($.docstring_chunk_double, $.docstring_quoted_double, $.docstring_newline)), '"""'),
+      seq("b'''", repeat(choice($.docstring_chunk_single, $.docstring_quoted_single, $.docstring_newline)), "'''"),
+      seq('B"""', repeat(choice($.docstring_chunk_double, $.docstring_quoted_double, $.docstring_newline)), '"""'),
+      seq("B'''", repeat(choice($.docstring_chunk_single, $.docstring_quoted_single, $.docstring_newline)), "'''"),
+    ),
+
+    prefixed_string: _ => token(choice(
+      RAW_STRING_DOUBLE,
+      RAW_STRING_SINGLE,
+    )),
+
+    prefixed_byte_string: _ => token(choice(
+      RAW_BYTE_STRING_DOUBLE,
+      RAW_BYTE_STRING_SINGLE,
+    )),
+
+    adjacent_string: $ => prec.right(seq(
+      field("left", choice(
+        $.string,
+        $.prefixed_string,
+        $.prefixed_byte_string,
+        $.triple_quoted_string,
+      )),
+      repeat1(field("right", choice(
+        $.string,
+        $.prefixed_string,
+        $.prefixed_byte_string,
+        $.triple_quoted_string,
+      ))),
+    )),
 
     special_builtin: $ => choice(
       $.empty_builtin,
@@ -941,22 +1020,14 @@ module.exports = grammar({
       ")",
     ),
 
-    tuple_type: $ => choice(
-      seq(
-        "(",
-        commaSep1($.type),
-        optional(","),
-        ")",
-      ),
-      seq(
-        "(",
-        repeat1($._soft_line_break),
-        $.type,
-        repeat(seq(optional($._soft_line_break), ",", repeat($._soft_line_break), $.type)),
-        optional(seq(optional($._soft_line_break), ",")),
-        softBreakTail($),
-        ")",
-      ),
+    tuple_type: $ => seq(
+      "(",
+      optional($._soft_line_break),
+      $.type,
+      repeat(seq(optional($._soft_line_break), ",", repeat($._soft_line_break), $.type)),
+      optional(seq(optional($._soft_line_break), ",")),
+      softBreakTail($),
+      ")",
     ),
 
     dyn_array_type: $ => prec(2, choice(
