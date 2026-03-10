@@ -60,6 +60,6 @@ def ping() -> uint256:
       return_type: (identifier))
     (block
       (return_statement
-        (atom_expression
+        value: (atom_expression
           (atom
             (integer)))))))

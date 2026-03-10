@@ -115,7 +115,7 @@ def f(xs: DynArray[address, 5], a: address, data: Bytes[64]) -> bool:
                     (identifier)))
                 (identifier))))))
       (return_statement
-        (binary_expression
+        value: (binary_expression
           left: (binary_expression
             left: (atom_expression
               (identifier))

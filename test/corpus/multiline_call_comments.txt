@@ -38,7 +38,7 @@ def append(_cmd: Bytes[64], _to: address) -> Bytes[64]:
             (integer)))))
     (block
       (return_statement
-        (atom_expression
+        value: (atom_expression
           (call
             function: (atom_expression
               (identifier))

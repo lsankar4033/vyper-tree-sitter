@@ -35,7 +35,7 @@ def prep(swap: address) -> (
         (identifier)))
     (block
       (return_statement
-        (atom_expression
+        value: (atom_expression
           (call
             function: (atom_expression
               (attribute

@@ -1,0 +1,224 @@
+=========================
+Additional literal forms
+=========================
+
+X: constant(Bytes[2]) = x"4142"
+
+@external
+def byte_string() -> Bytes[2]:
+    return B"AB"
+
+# pragma enable-decimals
+@external
+def exponent() -> decimal:
+    return 1e3
+
+# pragma enable-decimals
+@external
+def leading() -> decimal:
+    return .5
+
+# pragma enable-decimals
+@external
+def trailing() -> decimal:
+    return 1.
+
+---
+
+(source_file
+  (constant_declaration
+    (identifier)
+    (constant_type
+      (bytes_type
+        (atom_expression
+          (atom
+            (integer)))))
+    (atom_expression
+      (atom
+        (hex_string))))
+  (function_definition
+    (decorator
+      (identifier))
+    (function_signature
+      (identifier)
+      (bytes_type
+        (atom_expression
+          (atom
+            (integer)))))
+    (block
+      (return_statement
+        (atom_expression
+          (atom
+            (string))))))
+  (function_definition
+    (decorator
+      (identifier))
+    (function_signature
+      (identifier)
+      (identifier))
+    (block
+      (return_statement
+        (atom_expression
+          (atom
+            (decimal))))))
+  (function_definition
+    (decorator
+      (identifier))
+    (function_signature
+      (identifier)
+      (identifier))
+    (block
+      (return_statement
+        (atom_expression
+          (atom
+            (decimal))))))
+  (function_definition
+    (decorator
+      (identifier))
+    (function_signature
+      (identifier)
+      (identifier))
+    (block
+      (return_statement
+        (atom_expression
+          (atom
+            (decimal)))))))
+
+=========================
+Implements Module Interface
+=========================
+
+import access_control
+implements: access_control.__interface__
+
+@external
+@view
+def owner() -> address:
+    return empty(address)
+
+---
+
+(source_file
+  (import_statement
+    (import_item
+      (dotted_name
+        (identifier))))
+  (implements_statement
+    (imported_type
+      (identifier)
+      (identifier)))
+  (function_definition
+    (decorator
+      (identifier))
+    (decorator
+      (identifier))
+    (function_signature
+      (identifier)
+      (identifier))
+    (block
+      (return_statement
+        (atom_expression
+          (atom
+            (special_builtin
+              (empty_builtin
+                (identifier)))))))))
+
+=========================
+Trailing Commas In Types
+=========================
+
+x: DynArray[
+    uint256,
+    2,
+]
+
+y: HashMap[
+    address,
+    DynArray[uint256, 2],
+]
+
+---
+
+(source_file
+  (state_variable_declaration
+    (identifier)
+    (dyn_array_type
+      (identifier)
+      (atom_expression
+        (atom
+          (integer)))))
+  (state_variable_declaration
+    (identifier)
+    (hash_map_type
+      (identifier)
+      (dyn_array_type
+        (identifier)
+        (atom_expression
+          (atom
+            (integer)))))))
+
+=========================
+Tuple Packing Forms
+=========================
+
+@external
+def assign():
+    x: (uint256, uint256) = 1, 2
+
+@external
+def ret_one() -> (uint256,):
+    return 1,
+
+@external
+def ret_two() -> (uint256, uint256):
+    return 1, 2,
+
+---
+
+(source_file
+  (function_definition
+    (decorator
+      (identifier))
+    (function_signature
+      (identifier))
+    (block
+      (state_variable_declaration
+        (identifier)
+        (tuple_type
+          (identifier)
+          (identifier))
+        (packed_tuple
+          (atom_expression
+            (atom
+              (integer)))
+          (atom_expression
+            (atom
+              (integer)))))))
+  (function_definition
+    (decorator
+      (identifier))
+    (function_signature
+      (identifier)
+      (tuple_type
+        (identifier)))
+    (block
+      (return_statement
+        (atom_expression
+          (atom
+            (integer))))))
+  (function_definition
+    (decorator
+      (identifier))
+    (function_signature
+      (identifier)
+      (tuple_type
+        (identifier)
+        (identifier)))
+    (block
+      (return_statement
+        (atom_expression
+          (atom
+            (integer)))
+        (atom_expression
+          (atom
+            (integer)))))))

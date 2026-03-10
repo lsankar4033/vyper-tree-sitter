@@ -29,6 +29,6 @@ def f() -> uint256:
           (identifier)
           (identifier)))
       (return_statement
-        (atom_expression
+        value: (atom_expression
           (atom
             (integer)))))))

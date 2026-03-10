@@ -57,5 +57,5 @@ def newOptions() -> Bytes[MAX_OPTIONS_TOTAL_SIZE]:
                   (atom
                     (string))))))))
       (return_statement
-        (atom_expression
+        value: (atom_expression
           (identifier))))))

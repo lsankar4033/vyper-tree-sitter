@@ -6,6 +6,8 @@ const { commaSep1, sep1 } = require("./grammar/helpers");
 const {
   BYTE_STRING_DOUBLE,
   BYTE_STRING_SINGLE,
+  HEX_STRING_DOUBLE,
+  HEX_STRING_SINGLE,
   STRING_DOUBLE,
   STRING_SINGLE,
   DOCSTRING_CHUNK_DOUBLE_PATTERNS,
@@ -51,6 +53,28 @@ const multilineExpressionSequence = $ => seq(
   repeat(seq(repeat($._soft_line_break), ",", repeat($._soft_line_break), $.expression)),
   optional(seq(repeat($._soft_line_break), ",")),
   softBreakTail($),
+);
+
+const packedExpressionSequence = $ => choice(
+  seq(
+    $.expression,
+    ",",
+  ),
+  seq(
+    $.expression,
+    ",",
+    repeat($._soft_line_break),
+    $.expression,
+    repeat(seq(",", repeat($._soft_line_break), $.expression)),
+  ),
+  seq(
+    $.expression,
+    ",",
+    repeat($._soft_line_break),
+    $.expression,
+    repeat(seq(",", repeat($._soft_line_break), $.expression)),
+    ",",
+  ),
 );
 
 module.exports = grammar({
@@ -260,7 +284,7 @@ module.exports = grammar({
     implements_statement: $ => seq(
       "implements",
       ":",
-      $.identifier,
+      field("value", choice($.identifier, $.imported_type)),
       $._newline,
     ),
 
@@ -343,7 +367,7 @@ module.exports = grammar({
       field("name", $.identifier),
       ":",
       field("type", choice($.variable_annotation, $.type)),
-      optional(seq("=", field("value", $.expression))),
+      optional(seq("=", field("value", $._value_expression))),
       $._newline,
     ),
 
@@ -425,10 +449,26 @@ module.exports = grammar({
 
     continue_statement: $ => seq("continue", $._newline),
 
-    return_statement: $ => seq(
-      "return",
-      optional(commaSep1($.expression)),
-      $._newline,
+    return_statement: $ => choice(
+      seq("return", $._newline),
+      seq(
+        "return",
+        field("value", $.expression),
+        ",",
+        $._newline,
+      ),
+      seq(
+        "return",
+        field("value", $.expression),
+        repeat1(seq(",", $.expression)),
+        optional(","),
+        $._newline,
+      ),
+      seq(
+        "return",
+        field("value", $.expression),
+        $._newline,
+      ),
     ),
 
     assert_statement: $ => seq(
@@ -457,7 +497,7 @@ module.exports = grammar({
     assignment: $ => seq(
       field("left", choice($.assignment_target_list, $.expression)),
       "=",
-      field("right", $.expression),
+      field("right", $._value_expression),
       $._newline,
     ),
 
@@ -544,6 +584,13 @@ module.exports = grammar({
       commaSeparatedWithSoftBreaks($, $.argument),
       multilineCommaSeparatedWithSoftBreaks($, $.argument),
     )),
+
+    _value_expression: $ => choice(
+      $.packed_tuple,
+      $.expression,
+    ),
+
+    packed_tuple: $ => prec.right(1, packedExpressionSequence($)),
 
     expression: $ => choice(
       $.conditional_expression,
@@ -781,6 +828,7 @@ module.exports = grammar({
     atom: $ => choice(
       $.decimal,
       $.integer,
+      $.hex_string,
       $.string,
       $.boolean,
       $.ellipsis,
@@ -810,6 +858,8 @@ module.exports = grammar({
     docstring_quoted_single: _ => token(prec(3, /'[^'\n]+'/)),
 
     docstring_newline: _ => token(prec(3, /\n/)),
+
+    hex_string: _ => token(choice(HEX_STRING_DOUBLE, HEX_STRING_SINGLE)),
 
     special_builtin: $ => choice(
       $.empty_builtin,
@@ -916,6 +966,7 @@ module.exports = grammar({
         $.type,
         ",",
         $.expression,
+        optional(","),
         "]",
       ),
       seq(
@@ -927,6 +978,7 @@ module.exports = grammar({
         ",",
         repeat($._soft_line_break),
         $.expression,
+        optional(seq(repeat($._soft_line_break), ",")),
         softBreakTail($),
         "]",
       ),
@@ -939,6 +991,7 @@ module.exports = grammar({
         $.type,
         ",",
         $.type,
+        optional(","),
         "]",
       ),
       seq(
@@ -950,6 +1003,7 @@ module.exports = grammar({
         ",",
         repeat($._soft_line_break),
         $.type,
+        optional(seq(repeat($._soft_line_break), ",")),
         softBreakTail($),
         "]",
       ),
@@ -1001,7 +1055,12 @@ module.exports = grammar({
     comment: _ => token(prec(-1, seq("#", /.*/))),
     line_continuation: _ => token(seq("\\", /\r?\n/)),
     identifier: _ => /[A-Za-z_][A-Za-z0-9_]*/,
-    decimal: _ => token(/\d[\d_]*\.\d[\d_]*/),
+    decimal: _ => token(prec(2, choice(
+      /\d[\d_]*\.\d[\d_]*([eE][+-]?\d[\d_]*)?/,
+      /\d[\d_]*\.([eE][+-]?\d[\d_]*)?/,
+      /\.\d[\d_]*([eE][+-]?\d[\d_]*)?/,
+      /\d[\d_]*[eE][+-]?\d[\d_]*/,
+    ))),
     integer: _ => token(choice(
       /0[xX][0-9A-Fa-f_]+/,
       /0[bB][01_]+/,

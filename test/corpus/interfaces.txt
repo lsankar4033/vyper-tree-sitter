@@ -26,7 +26,7 @@ exports: (foo, bar.baz)
         return_type: (identifier))
       (mutability)))
   (implements_statement
-    (identifier))
+    value: (identifier))
   (exports_declaration
     (tuple
       (atom_expression
