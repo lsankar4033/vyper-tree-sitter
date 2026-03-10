@@ -31,7 +31,7 @@ def demo():
                 left: (atom_expression
                   (atom
                     (parenthesized_expression
-                      (binary_expression
+                      (wrapped_binary_expression
                         left: (external_call
                           value: (atom_expression
                             (call

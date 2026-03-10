@@ -14,6 +14,8 @@ const DOCSTRING_CHUNK_DOUBLE_PATTERNS = [
   /\\./,
   /"[^"\n]/,
   /""[^"\n]/,
+  /"\n/,
+  /""\n/,
 ];
 
 const DOCSTRING_CHUNK_SINGLE_PATTERNS = [
@@ -21,6 +23,8 @@ const DOCSTRING_CHUNK_SINGLE_PATTERNS = [
   /\\./,
   /'[^'\n]/,
   /''[^'\n]/,
+  /'\n/,
+  /''\n/,
 ];
 
 module.exports = {

@@ -23,6 +23,38 @@ const softBreakTail = $ => seq(
   optional($._soft_line_break_end),
 );
 
+const tripleQuotedDoubleBody = $ => repeat(choice(
+  $.docstring_chunk_double,
+  $.docstring_newline,
+));
+
+const tripleQuotedSingleBody = $ => repeat(choice(
+  $.docstring_chunk_single,
+  $.docstring_newline,
+));
+
+const tripleQuotedVariants = ($, prefixes) => choice(
+  ...prefixes.flatMap(prefix => [
+    seq(`${prefix}"""`, tripleQuotedDoubleBody($), '"""'),
+    seq(`${prefix}'''`, tripleQuotedSingleBody($), "'''"),
+  ]),
+);
+
+const adjacentStringSegment = $ => choice(
+  $.string,
+  $.prefixed_string,
+  $.prefixed_byte_string,
+  $.triple_quoted_string,
+);
+
+const continuedExpression = $ => choice(
+  $.wrapped_binary_expression,
+  $.wrapped_conditional_expression,
+  $.wrapped_external_call,
+  $.continued_adjacent_string,
+  $.expression,
+);
+
 const declarationBody = ($, memberRule) => seq(
   $._newline,
   repeat($._newline),
@@ -121,6 +153,8 @@ module.exports = grammar({
     [$.parenthesized_expression, $.multiline_tuple, $.tuple_type],
     [$.tuple, $.multiline_tuple],
     [$.docstring, $.triple_quoted_string],
+    [$.atom, $.adjacent_string],
+    [$.atom, $.continued_adjacent_string],
     [$.parameter_list],
     [$.module_binding_list],
     [$.argument_list],
@@ -155,6 +189,7 @@ module.exports = grammar({
       $.implements_statement,
       $.exports_declaration,
       $.function_definition,
+      $.interface_stub_definition,
       $.constant_declaration,
       $.state_variable_declaration,
       $._newline,
@@ -212,11 +247,11 @@ module.exports = grammar({
     )),
 
     parenthesized_import_list: $ => prec.right(seq(
-      optional($._newline),
+      repeat($._newline),
       $.import_item,
-      repeat(seq(optional($._newline), ",", optional($._newline), $.import_item)),
-      optional(seq(optional($._newline), ",")),
-      optional($._newline),
+      repeat(seq(repeat($._newline), ",", repeat($._newline), $.import_item)),
+      optional(seq(repeat($._newline), ",")),
+      repeat($._newline),
     )),
 
     imported_type: $ => seq($.identifier, repeat1(seq(".", $.identifier))),
@@ -244,10 +279,19 @@ module.exports = grammar({
     ),
 
     interface_member: $ => seq(
-      $.function_signature,
-      ":",
-      $.mutability,
-      $._newline,
+      choice(
+        seq(
+          $.function_signature,
+          ":",
+          $.mutability,
+          $._newline,
+        ),
+        seq(
+          $.function_signature,
+          ":",
+          declarationBody($, seq($.mutability, $._newline)),
+        ),
+      ),
     ),
 
 
@@ -272,7 +316,9 @@ module.exports = grammar({
     indexed_type: $ => seq(
       "indexed",
       "(",
+      repeat($._soft_line_break),
       $.type,
+      softBreakTail($),
       ")",
     ),
 
@@ -307,8 +353,21 @@ module.exports = grammar({
     initializes_statement: $ => seq(
       "initializes",
       ":",
-      field("value", choice($.identifier, $.imported_type, $.module_initialization)),
+      field("value", $._initializes_value),
       $._newline,
+    ),
+
+    _initializes_value: $ => choice(
+      $.identifier,
+      $.imported_type,
+      $.module_initialization,
+      seq(
+        "(",
+        repeat($._soft_line_break),
+        $._initializes_value,
+        softBreakTail($),
+        ")",
+      ),
     ),
 
     module_initialization: $ => seq(
@@ -395,6 +454,14 @@ module.exports = grammar({
       $.function_signature,
       ":",
       $.block,
+    ),
+
+    interface_stub_definition: $ => seq(
+      repeat(seq($.decorator, repeat($._newline))),
+      $.function_signature,
+      ":",
+      $.ellipsis,
+      $._newline,
     ),
 
     function_signature: $ => seq(
@@ -613,8 +680,7 @@ module.exports = grammar({
 
     argument: $ => choice(
       $.keyword_argument,
-      $.wrapped_binary_expression,
-      $.expression,
+      continuedExpression($),
     ),
 
     keyword_argument: $ => seq(
@@ -648,6 +714,18 @@ module.exports = grammar({
       field("alternative", $.expression),
     )),
 
+    wrapped_conditional_expression: $ => prec.right(PREC.conditional, seq(
+      field("consequence", choice($.wrapped_binary_expression, $.expression)),
+      repeat($._soft_line_break),
+      "if",
+      repeat($._soft_line_break),
+      field("condition", choice($.wrapped_binary_expression, $.expression)),
+      repeat($._soft_line_break),
+      "else",
+      repeat($._soft_line_break),
+      field("alternative", choice($.wrapped_binary_expression, $.expression)),
+    )),
+
     _expression_without_conditional: $ => choice(
       $.atom_expression,
       $.external_call,
@@ -669,11 +747,11 @@ module.exports = grammar({
     )),
 
     parenthesized_expression: $ => choice(
-      seq("(", $.expression, ")"),
+      seq("(", continuedExpression($), ")"),
       seq(
         "(",
         repeat1($._soft_line_break),
-        choice($.wrapped_binary_expression, $.expression),
+        continuedExpression($),
         softBreakTail($),
         ")",
       ),
@@ -785,6 +863,12 @@ module.exports = grammar({
       field("value", $.atom_expression),
     )),
 
+    wrapped_external_call: $ => prec(PREC.unary, seq(
+      field("kind", choice("extcall", "staticcall")),
+      repeat1($._soft_line_break),
+      field("value", $.atom_expression),
+    )),
+
     attribute: $ => prec.left(PREC.attribute, seq(
       field("value", $.atom_expression),
       ".",
@@ -888,34 +972,39 @@ module.exports = grammar({
     ),
 
     docstring: $ => choice(
-      seq('"""', repeat(choice($.docstring_chunk_double, $.docstring_quoted_double, $.docstring_newline)), '"""'),
-      seq("'''", repeat(choice($.docstring_chunk_single, $.docstring_quoted_single, $.docstring_newline)), "'''"),
+      seq('"""', tripleQuotedDoubleBody($), '"""'),
+      seq("'''", tripleQuotedSingleBody($), "'''"),
     ),
 
     docstring_chunk_double: _ => token(prec(3, choice(
       ...DOCSTRING_CHUNK_DOUBLE_PATTERNS,
     ))),
 
-    docstring_quoted_double: _ => token(prec(3, /"[^"\n]+"/)),
-
     docstring_chunk_single: _ => token(prec(3, choice(
       ...DOCSTRING_CHUNK_SINGLE_PATTERNS,
     ))),
-
-    docstring_quoted_single: _ => token(prec(3, /'[^'\n]+'/)),
 
     docstring_newline: _ => token(prec(3, /\n/)),
 
     hex_string: _ => token(choice(HEX_STRING_DOUBLE, HEX_STRING_SINGLE)),
 
-    triple_quoted_string: $ => choice(
-      seq('"""', repeat(choice($.docstring_chunk_double, $.docstring_quoted_double, $.docstring_newline)), '"""'),
-      seq("'''", repeat(choice($.docstring_chunk_single, $.docstring_quoted_single, $.docstring_newline)), "'''"),
-      seq('b"""', repeat(choice($.docstring_chunk_double, $.docstring_quoted_double, $.docstring_newline)), '"""'),
-      seq("b'''", repeat(choice($.docstring_chunk_single, $.docstring_quoted_single, $.docstring_newline)), "'''"),
-      seq('B"""', repeat(choice($.docstring_chunk_double, $.docstring_quoted_double, $.docstring_newline)), '"""'),
-      seq("B'''", repeat(choice($.docstring_chunk_single, $.docstring_quoted_single, $.docstring_newline)), "'''"),
-    ),
+    triple_quoted_string: $ => tripleQuotedVariants($, [
+      "",
+      "b",
+      "B",
+      "r",
+      "R",
+      "u",
+      "U",
+      "rb",
+      "rB",
+      "Rb",
+      "RB",
+      "br",
+      "bR",
+      "Br",
+      "BR",
+    ]),
 
     prefixed_string: _ => token(choice(
       RAW_STRING_DOUBLE,
@@ -928,18 +1017,16 @@ module.exports = grammar({
     )),
 
     adjacent_string: $ => prec.right(seq(
-      field("left", choice(
-        $.string,
-        $.prefixed_string,
-        $.prefixed_byte_string,
-        $.triple_quoted_string,
+      field("left", adjacentStringSegment($)),
+      repeat1(field("right", adjacentStringSegment($))),
+    )),
+
+    continued_adjacent_string: $ => prec.right(seq(
+      field("left", adjacentStringSegment($)),
+      repeat1(seq(
+        repeat1($._soft_line_break),
+        field("right", adjacentStringSegment($)),
       )),
-      repeat1(field("right", choice(
-        $.string,
-        $.prefixed_string,
-        $.prefixed_byte_string,
-        $.triple_quoted_string,
-      ))),
     )),
 
     special_builtin: $ => choice(
@@ -1024,7 +1111,7 @@ module.exports = grammar({
 
     tuple_type: $ => seq(
       "(",
-      optional($._soft_line_break),
+      repeat($._soft_line_break),
       $.type,
       repeat(seq(optional($._soft_line_break), ",", repeat($._soft_line_break), $.type)),
       optional(seq(optional($._soft_line_break), ",")),

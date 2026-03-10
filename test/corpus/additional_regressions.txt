@@ -1,0 +1,343 @@
+=========================
+Triple-Quoted Literal Edge Cases
+=========================
+
+X: constant(String[2]) = r""""a"""
+
+@external
+def quote_before_newline() -> String[2]:
+    return """"
+"""
+
+---
+
+(source_file
+  (constant_declaration
+    (identifier)
+    (constant_type
+      (string_type
+        (atom_expression
+          (atom
+            (integer)))))
+    (atom_expression
+      (atom
+        (triple_quoted_string
+          (docstring_chunk_double)))))
+  (function_definition
+    (decorator
+      (identifier))
+    (function_signature
+      (identifier)
+      (string_type
+        (atom_expression
+          (atom
+            (integer)))))
+    (block
+      (return_statement
+        (atom_expression
+          (atom
+            (triple_quoted_string
+              (docstring_chunk_double))))))))
+
+=========================
+Continued Adjacent Literals
+=========================
+
+@external
+def ret() -> String[2]:
+    return ("a"
+        "b")
+
+@external
+def arg() -> uint256:
+    return len("a"
+        "b")
+
+---
+
+(source_file
+  (function_definition
+    (decorator
+      (identifier))
+    (function_signature
+      (identifier)
+      (string_type
+        (atom_expression
+          (atom
+            (integer)))))
+    (block
+      (return_statement
+        (atom_expression
+          (atom
+            (parenthesized_expression
+              (continued_adjacent_string
+                (string)
+                (string))))))))
+  (function_definition
+    (decorator
+      (identifier))
+    (function_signature
+      (identifier)
+      (identifier))
+    (block
+      (return_statement
+        (atom_expression
+          (call
+            (atom_expression
+              (identifier))
+            (argument_list
+              (argument
+                (continued_adjacent_string
+                  (string)
+                  (string))))))))))
+
+=========================
+Import And Initializes Wrappers
+=========================
+
+from . import(
+
+m
+)
+
+from . import(
+m
+
+)
+
+import dep
+initializes: (dep)
+
+import lib
+import dep
+initializes: dep
+initializes: (lib[dep := dep])
+
+---
+
+(source_file
+  (from_import_statement
+    (relative_import_path)
+    (parenthesized_import_list
+      (import_item
+        (dotted_name
+          (identifier)))))
+  (from_import_statement
+    (relative_import_path)
+    (parenthesized_import_list
+      (import_item
+        (dotted_name
+          (identifier)))))
+  (import_statement
+    (import_item
+      (dotted_name
+        (identifier))))
+  (initializes_statement
+    (identifier))
+  (import_statement
+    (import_item
+      (dotted_name
+        (identifier))))
+  (import_statement
+    (import_item
+      (dotted_name
+        (identifier))))
+  (initializes_statement
+    (identifier))
+  (initializes_statement
+    (module_initialization
+      (identifier)
+      (module_binding_list
+        (module_binding
+          (identifier)
+          (atom_expression
+            (identifier)))))))
+
+=========================
+Interface And Event Formatting
+=========================
+
+event E:
+    a:indexed(
+        bool)
+    b:indexed(bool
+    )
+
+interface I:
+    def mut():
+        nonpayable
+
+    def tup()->(
+
+        bool,
+    ):view
+
+---
+
+(source_file
+  (event_declaration
+    (identifier)
+    (event_member
+      (identifier)
+      (indexed_type
+        (identifier)))
+    (event_member
+      (identifier)
+      (indexed_type
+        (identifier))))
+  (interface_declaration
+    (identifier)
+    (interface_member
+      (function_signature
+        (identifier))
+      (mutability))
+    (interface_member
+      (function_signature
+        (identifier)
+        (tuple_type
+          (identifier)))
+      (mutability))))
+
+=========================
+Continued Conditionals And Calls
+=========================
+
+interface J:
+    def f() -> uint256: view
+    def g() -> uint256: nonpayable
+
+@external
+@view
+def cond() -> uint256:
+    assert (True
+        if True else False)
+    return 1
+
+@external
+@view
+def static_soft() -> uint256:
+    return (staticcall
+        J(empty(address)).f())
+
+@external
+def ext_soft() -> uint256:
+    return (extcall
+        J(empty(address)).g())
+
+---
+
+(source_file
+  (interface_declaration
+    (identifier)
+    (interface_member
+      (function_signature
+        (identifier)
+        (identifier))
+      (mutability))
+    (interface_member
+      (function_signature
+        (identifier)
+        (identifier))
+      (mutability)))
+  (function_definition
+    (decorator
+      (identifier))
+    (decorator
+      (identifier))
+    (function_signature
+      (identifier)
+      (identifier))
+    (block
+      (assert_statement
+        (atom_expression
+          (atom
+            (parenthesized_expression
+              (wrapped_conditional_expression
+                (atom_expression
+                  (atom
+                    (boolean)))
+                (atom_expression
+                  (atom
+                    (boolean)))
+                (atom_expression
+                  (atom
+                    (boolean))))))))
+      (return_statement
+        (atom_expression
+          (atom
+            (integer))))))
+  (function_definition
+    (decorator
+      (identifier))
+    (decorator
+      (identifier))
+    (function_signature
+      (identifier)
+      (identifier))
+    (block
+      (return_statement
+        (atom_expression
+          (atom
+            (parenthesized_expression
+              (wrapped_external_call
+                (atom_expression
+                  (call
+                    (atom_expression
+                      (attribute
+                        (atom_expression
+                          (call
+                            (atom_expression
+                              (identifier))
+                            (argument_list
+                              (argument
+                                (atom_expression
+                                  (atom
+                                    (special_builtin
+                                      (empty_builtin
+                                        (identifier)))))))))
+                        (identifier))))))))))))
+  (function_definition
+    (decorator
+      (identifier))
+    (function_signature
+      (identifier)
+      (identifier))
+    (block
+      (return_statement
+        (atom_expression
+          (atom
+            (parenthesized_expression
+              (wrapped_external_call
+                (atom_expression
+                  (call
+                    (atom_expression
+                      (attribute
+                        (atom_expression
+                          (call
+                            (atom_expression
+                              (identifier))
+                            (argument_list
+                              (argument
+                                (atom_expression
+                                  (atom
+                                    (special_builtin
+                                      (empty_builtin
+                                        (identifier)))))))))
+                        (identifier)))))))))))))
+
+=========================
+Interface Stub Definition
+=========================
+
+@external
+def f(): ...
+
+---
+
+(source_file
+  (interface_stub_definition
+    (decorator
+      (identifier))
+    (function_signature
+      (identifier))
+    (ellipsis)))

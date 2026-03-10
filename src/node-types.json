@@ -223,6 +223,10 @@
       "required": true,
       "types": [
         {
+          "type": "continued_adjacent_string",
+          "named": true
+        },
+        {
           "type": "expression",
           "named": true
         },
@@ -232,6 +236,14 @@
         },
         {
           "type": "wrapped_binary_expression",
+          "named": true
+        },
+        {
+          "type": "wrapped_conditional_expression",
+          "named": true
+        },
+        {
+          "type": "wrapped_external_call",
           "named": true
         }
       ]
@@ -827,6 +839,56 @@
     "fields": {}
   },
   {
+    "type": "continued_adjacent_string",
+    "named": true,
+    "fields": {
+      "left": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "prefixed_byte_string",
+            "named": true
+          },
+          {
+            "type": "prefixed_string",
+            "named": true
+          },
+          {
+            "type": "string",
+            "named": true
+          },
+          {
+            "type": "triple_quoted_string",
+            "named": true
+          }
+        ]
+      },
+      "right": {
+        "multiple": true,
+        "required": true,
+        "types": [
+          {
+            "type": "prefixed_byte_string",
+            "named": true
+          },
+          {
+            "type": "prefixed_string",
+            "named": true
+          },
+          {
+            "type": "string",
+            "named": true
+          },
+          {
+            "type": "triple_quoted_string",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "decorator",
     "named": true,
     "fields": {
@@ -911,14 +973,6 @@
         },
         {
           "type": "docstring_newline",
-          "named": true
-        },
-        {
-          "type": "docstring_quoted_double",
-          "named": true
-        },
-        {
-          "type": "docstring_quoted_single",
           "named": true
         }
       ]
@@ -1488,9 +1542,17 @@
     "named": true,
     "fields": {
       "value": {
-        "multiple": false,
+        "multiple": true,
         "required": true,
         "types": [
+          {
+            "type": "(",
+            "named": false
+          },
+          {
+            "type": ")",
+            "named": false
+          },
           {
             "type": "identifier",
             "named": true
@@ -1547,6 +1609,29 @@
         },
         {
           "type": "mutability",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "interface_stub_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "decorator",
+          "named": true
+        },
+        {
+          "type": "ellipsis",
+          "named": true
+        },
+        {
+          "type": "function_signature",
           "named": true
         }
       ]
@@ -1801,11 +1886,23 @@
       "required": true,
       "types": [
         {
+          "type": "continued_adjacent_string",
+          "named": true
+        },
+        {
           "type": "expression",
           "named": true
         },
         {
           "type": "wrapped_binary_expression",
+          "named": true
+        },
+        {
+          "type": "wrapped_conditional_expression",
+          "named": true
+        },
+        {
+          "type": "wrapped_external_call",
           "named": true
         }
       ]
@@ -1962,6 +2059,10 @@
         },
         {
           "type": "interface_declaration",
+          "named": true
+        },
+        {
+          "type": "interface_stub_definition",
           "named": true
         },
         {
@@ -2184,14 +2285,6 @@
         },
         {
           "type": "docstring_newline",
-          "named": true
-        },
-        {
-          "type": "docstring_quoted_double",
-          "named": true
-        },
-        {
-          "type": "docstring_quoted_single",
           "named": true
         }
       ]
@@ -2478,6 +2571,84 @@
     }
   },
   {
+    "type": "wrapped_conditional_expression",
+    "named": true,
+    "fields": {
+      "alternative": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          },
+          {
+            "type": "wrapped_binary_expression",
+            "named": true
+          }
+        ]
+      },
+      "condition": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          },
+          {
+            "type": "wrapped_binary_expression",
+            "named": true
+          }
+        ]
+      },
+      "consequence": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          },
+          {
+            "type": "wrapped_binary_expression",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "wrapped_external_call",
+    "named": true,
+    "fields": {
+      "kind": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "extcall",
+            "named": false
+          },
+          {
+            "type": "staticcall",
+            "named": false
+          }
+        ]
+      },
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "atom_expression",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "!=",
     "named": false
   },
@@ -2634,6 +2805,22 @@
     "named": false
   },
   {
+    "type": "BR\"\"\"",
+    "named": false
+  },
+  {
+    "type": "BR'''",
+    "named": false
+  },
+  {
+    "type": "Br\"\"\"",
+    "named": false
+  },
+  {
+    "type": "Br'''",
+    "named": false
+  },
+  {
     "type": "Bytes",
     "named": false
   },
@@ -2650,11 +2837,43 @@
     "named": false
   },
   {
+    "type": "R\"\"\"",
+    "named": false
+  },
+  {
+    "type": "R'''",
+    "named": false
+  },
+  {
+    "type": "RB\"\"\"",
+    "named": false
+  },
+  {
+    "type": "RB'''",
+    "named": false
+  },
+  {
+    "type": "Rb\"\"\"",
+    "named": false
+  },
+  {
+    "type": "Rb'''",
+    "named": false
+  },
+  {
     "type": "String",
     "named": false
   },
   {
     "type": "True",
+    "named": false
+  },
+  {
+    "type": "U\"\"\"",
+    "named": false
+  },
+  {
+    "type": "U'''",
     "named": false
   },
   {
@@ -2702,6 +2921,22 @@
     "named": false
   },
   {
+    "type": "bR\"\"\"",
+    "named": false
+  },
+  {
+    "type": "bR'''",
+    "named": false
+  },
+  {
+    "type": "br\"\"\"",
+    "named": false
+  },
+  {
+    "type": "br'''",
+    "named": false
+  },
+  {
     "type": "break",
     "named": false
   },
@@ -2736,14 +2971,6 @@
   },
   {
     "type": "docstring_newline",
-    "named": true
-  },
-  {
-    "type": "docstring_quoted_double",
-    "named": true
-  },
-  {
-    "type": "docstring_quoted_single",
     "named": true
   },
   {
@@ -2880,7 +3107,31 @@
     "named": false
   },
   {
+    "type": "r\"\"\"",
+    "named": false
+  },
+  {
+    "type": "r'''",
+    "named": false
+  },
+  {
+    "type": "rB\"\"\"",
+    "named": false
+  },
+  {
+    "type": "rB'''",
+    "named": false
+  },
+  {
     "type": "raise",
+    "named": false
+  },
+  {
+    "type": "rb\"\"\"",
+    "named": false
+  },
+  {
+    "type": "rb'''",
     "named": false
   },
   {
@@ -2905,6 +3156,14 @@
   },
   {
     "type": "transient",
+    "named": false
+  },
+  {
+    "type": "u\"\"\"",
+    "named": false
+  },
+  {
+    "type": "u'''",
     "named": false
   },
   {
